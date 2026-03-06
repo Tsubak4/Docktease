@@ -1,0 +1,1284 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Docktease - Contact</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --marine-deep: #0a2647;
+        --marine-medium: #144272;
+        --marine-light: #2c74b3;
+        --electric-blue: #00f3ff;
+        --electric-cyan: #00ffff;
+        --white: #ffffff;
+        --glow-intensity: 0.8;
+      }
+
+      body {
+        font-family: "Roboto", sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(
+          145deg,
+          #0a2647 0%,
+          #144272 35%,
+          #2c74b3 70%,
+          #a5d7e8 100%
+        );
+        color: #fff;
+        position: relative;
+        overflow-x: hidden;
+        border: 3px solid var(--electric-blue);
+        box-shadow:
+          0 0 20px var(--electric-blue),
+          inset 0 0 20px var(--electric-blue);
+        animation: neonPulse 2s infinite ease-in-out;
+      }
+
+      @keyframes neonPulse {
+        0%,
+        100% {
+          border-color: var(--electric-blue);
+          box-shadow:
+            0 0 20px var(--electric-blue),
+            inset 0 0 20px var(--electric-blue);
+        }
+        50% {
+          border-color: var(--electric-cyan);
+          box-shadow:
+            0 0 40px var(--electric-cyan),
+            inset 0 0 30px var(--electric-cyan);
+        }
+      }
+
+      .ocean {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+      }
+
+      .bubbles {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
+
+      .bubble {
+        position: absolute;
+        bottom: -100px;
+        background: rgba(0, 243, 255, 0.2);
+        border-radius: 50%;
+        box-shadow:
+          0 0 20px var(--electric-blue),
+          inset 0 0 10px rgba(255, 255, 255, 0.5);
+        animation: rise 15s infinite ease-in;
+      }
+
+      @keyframes rise {
+        0% {
+          transform: translateY(0) rotate(0deg);
+          opacity: 0.1;
+        }
+        100% {
+          transform: translateY(-1000px) rotate(720deg);
+          opacity: 0.8;
+        }
+      }
+
+      nav {
+        background: rgba(10, 38, 71, 0.3);
+        backdrop-filter: blur(10px);
+        border-bottom: 3px solid var(--electric-blue);
+        box-shadow: 0 5px 25px var(--electric-blue);
+        padding: 1rem 2rem;
+        position: fixed;
+        width: 100%;
+        z-index: 100;
+        animation: headerNeon 2s infinite ease-in-out;
+      }
+
+      @keyframes headerNeon {
+        0%,
+        100% {
+          border-bottom-color: var(--electric-blue);
+          box-shadow: 0 5px 25px var(--electric-blue);
+        }
+        50% {
+          border-bottom-color: var(--electric-cyan);
+          box-shadow: 0 5px 35px var(--electric-cyan);
+        }
+      }
+
+      .nav-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        font-size: 2rem;
+        font-weight: 800;
+        font-family: "Orbitron", sans-serif;
+        background: linear-gradient(135deg, var(--electric-blue) 0%, #fff 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 2px;
+        position: relative;
+        text-shadow: 0 0 30px var(--electric-blue);
+      }
+
+      .logo::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--electric-blue),
+          var(--electric-cyan),
+          transparent
+        );
+        box-shadow: 0 0 20px var(--electric-blue);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+      }
+
+      .nav-links a {
+        color: #fff;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+        position: relative;
+        text-shadow: 0 0 10px var(--electric-blue);
+      }
+
+      .nav-links a::before {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 2px;
+        background: var(--electric-blue);
+        box-shadow: 0 0 20px var(--electric-blue);
+        transition: width 0.3s ease;
+      }
+
+      .nav-links a:hover::before {
+        width: 70%;
+      }
+
+      .nav-links a:hover {
+        text-shadow:
+          0 0 20px var(--electric-blue),
+          0 0 40px var(--electric-blue);
+      }
+
+      main {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 6rem 2rem 4rem;
+        position: relative;
+        z-index: 10;
+        width: 100%;
+      }
+
+      .content-wrapper {
+        width: 50%;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+
+      .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .page-header h1 {
+        font-family: "Orbitron", sans-serif;
+        font-size: 2.2rem;
+        margin-bottom: 0.8rem;
+        background: linear-gradient(
+          135deg,
+          #fff 0%,
+          var(--electric-blue) 50%,
+          #fff 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 30px var(--electric-blue);
+      }
+
+      .page-header p {
+        color: var(--electric-blue);
+        font-size: 1rem;
+        text-shadow: 0 0 10px var(--electric-blue);
+      }
+
+      .contact-form-container {
+        background: rgba(10, 38, 71, 0.5);
+        backdrop-filter: blur(10px);
+        border: 2px solid var(--electric-blue);
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 0 30px var(--electric-blue);
+      }
+
+      .contact-form-container h2 {
+        font-family: "Orbitron", sans-serif;
+        color: var(--electric-blue);
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-size: 1.5rem;
+        text-shadow: 0 0 15px var(--electric-blue);
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .form-group {
+        position: relative;
+        margin-bottom: 1rem;
+      }
+
+      .form-group label {
+        display: block;
+        font-family: "Orbitron", sans-serif;
+        color: var(--electric-blue);
+        margin-bottom: 5px;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: 0 0 10px var(--electric-blue);
+      }
+
+      .input-container {
+        position: relative;
+      }
+
+      .input-container i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--electric-blue);
+        font-size: 1rem;
+        text-shadow: 0 0 5px var(--electric-blue);
+        z-index: 2;
+      }
+
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+        padding: 10px 10px 10px 35px;
+        background: rgba(10, 38, 71, 0.8);
+        border: 2px solid var(--electric-blue);
+        border-radius: 8px;
+        color: #fff;
+        font-size: 0.9rem;
+        font-family: "Roboto", sans-serif;
+        transition: all 0.3s ease;
+        outline: none;
+      }
+
+      .form-group textarea {
+        padding: 10px 10px 10px 35px;
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus,
+      .form-group select:focus {
+        border-color: var(--electric-cyan);
+        background: rgba(10, 38, 71, 0.9);
+        box-shadow: 0 0 15px var(--electric-blue);
+      }
+
+      .radio-group {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin: 1rem 0;
+        padding: 0.8rem;
+        background: rgba(0, 243, 255, 0.05);
+        border-radius: 8px;
+      }
+
+      .radio-option {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .radio-option input[type="radio"] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--electric-blue);
+      }
+
+      .radio-option label {
+        color: #fff;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.8rem;
+        text-shadow: 0 0 5px var(--electric-blue);
+      }
+
+      .btn-submit {
+        width: 100%;
+        padding: 12px;
+        background: rgba(0, 243, 255, 0.1);
+        border: 2px solid var(--electric-blue);
+        border-radius: 8px;
+        color: #fff;
+        font-family: "Orbitron", sans-serif;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-shadow: 0 0 10px var(--electric-blue);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 0 20px var(--electric-blue);
+        margin-top: 1rem;
+      }
+
+      .btn-submit:hover:not(:disabled) {
+        background: rgba(0, 243, 255, 0.2);
+        box-shadow: 0 0 25px var(--electric-blue);
+        transform: translateY(-2px);
+      }
+
+      .btn-submit::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 243, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .btn-submit:hover::before {
+        left: 100%;
+      }
+
+      .btn-submit:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .message {
+        margin-top: 1rem;
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+        font-family: "Roboto", sans-serif;
+        font-size: 0.9rem;
+        display: none;
+        border: 2px solid;
+      }
+
+      .message.error {
+        display: block;
+        background: rgba(255, 0, 0, 0.1);
+        border-color: #ff4444;
+        color: #ff9999;
+        text-shadow: 0 0 5px rgba(255, 68, 68, 0.5);
+      }
+
+      .cooldown-warning {
+        text-align: center;
+        font-size: 0.75rem;
+        color: #ff4444;
+        margin-top: 10px;
+        font-style: italic;
+      }
+
+      .separator {
+        margin: 1.5rem 0;
+        position: relative;
+        text-align: center;
+      }
+
+      .separator-line {
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--electric-blue),
+          var(--electric-cyan),
+          var(--electric-blue),
+          transparent
+        );
+        box-shadow: 0 0 15px var(--electric-blue);
+        width: 100%;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        animation: fadeIn 0.3s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .modal-container {
+        position: relative;
+        z-index: 2001;
+        width: 100%;
+        max-width: 400px;
+        padding: 30px;
+        background: linear-gradient(
+          135deg,
+          var(--marine-deep),
+          var(--marine-medium)
+        );
+        border: 3px solid var(--electric-blue);
+        border-radius: 15px;
+        box-shadow:
+          0 20px 40px rgba(0, 0, 0, 0.7),
+          0 0 30px var(--electric-blue);
+        transform: scale(0.9);
+        animation: modalAppear 0.3s ease forwards;
+        text-align: center;
+      }
+
+      @keyframes modalAppear {
+        from {
+          transform: scale(0.9);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .modal-icon {
+        font-size: 4rem;
+        color: var(--electric-blue);
+        margin-bottom: 1rem;
+        text-shadow: 0 0 30px var(--electric-blue);
+        animation: iconPulse 2s infinite;
+      }
+
+      @keyframes iconPulse {
+        0%,
+        100% {
+          transform: scale(1);
+          text-shadow: 0 0 30px var(--electric-blue);
+        }
+        50% {
+          transform: scale(1.1);
+          text-shadow: 0 0 50px var(--electric-cyan);
+        }
+      }
+
+      .modal-title {
+        font-family: "Orbitron", sans-serif;
+        font-size: 2rem;
+        color: #fff;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 0 0 15px var(--electric-blue);
+        background: linear-gradient(
+          to bottom,
+          #fff 0%,
+          var(--electric-blue) 50%,
+          var(--electric-cyan) 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .modal-message {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        margin-bottom: 25px;
+        line-height: 1.6;
+        text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+      }
+
+      .modal-btn {
+        padding: 12px 30px;
+        font-family: "Orbitron", sans-serif;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        border: 2px solid var(--electric-blue);
+        background: rgba(0, 243, 255, 0.1);
+        color: #fff;
+        text-shadow: 0 0 10px var(--electric-blue);
+        box-shadow: 0 0 20px var(--electric-blue);
+      }
+
+      .modal-btn:hover {
+        background: rgba(0, 243, 255, 0.2);
+        box-shadow: 0 0 30px var(--electric-blue);
+        transform: translateY(-2px);
+      }
+
+      .wave-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: 5;
+      }
+
+      .wave {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 80px;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%2300f3ff" fill-opacity="0.3" d="M0,256L48,234.7C96,213,192,171,288,176C384,181,480,235,576,250.7C672,267,768,245,864,208C960,171,1056,117,1152,112C1248,107,1344,149,1392,170.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"/></svg>');
+        background-size: cover;
+        background-repeat: no-repeat;
+        animation: wave 8s infinite linear;
+        filter: drop-shadow(0 0 15px var(--electric-blue));
+      }
+
+      .wave:nth-child(2) {
+        bottom: 8px;
+        opacity: 0.5;
+        animation: wave 10s infinite linear reverse;
+        filter: drop-shadow(0 0 20px var(--electric-cyan));
+      }
+
+      @keyframes wave {
+        0% {
+          transform: translateX(0) translateZ(0) scaleY(1);
+        }
+        50% {
+          transform: translateX(-25%) translateZ(0) scaleY(0.8);
+        }
+        100% {
+          transform: translateX(-50%) translateZ(0) scaleY(1);
+        }
+      }
+
+      footer {
+        background: rgba(10, 38, 71, 0.8);
+        backdrop-filter: blur(10px);
+        padding: 1.5rem;
+        text-align: center;
+        position: relative;
+        z-index: 20;
+        border-top: 3px solid var(--electric-blue);
+        box-shadow: 0 -5px 25px var(--electric-blue);
+        animation: footerNeon 2s infinite ease-in-out;
+      }
+
+      @keyframes footerNeon {
+        0%,
+        100% {
+          border-top-color: var(--electric-blue);
+          box-shadow: 0 -5px 25px var(--electric-blue);
+        }
+        50% {
+          border-top-color: var(--electric-cyan);
+          box-shadow: 0 -5px 35px var(--electric-cyan);
+        }
+      }
+
+      .footer-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .copyright {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.9rem;
+        text-shadow: 0 0 15px var(--electric-blue);
+        letter-spacing: 1px;
+        text-align: center;
+      }
+
+      .ship {
+        position: absolute;
+        bottom: 120px;
+        right: 5%;
+        font-size: 4rem;
+        opacity: 0.2;
+        animation: float 6s infinite ease-in-out;
+        z-index: 1;
+        filter: drop-shadow(0 0 30px var(--electric-blue));
+        color: var(--electric-blue);
+      }
+
+      .anchor {
+        position: absolute;
+        top: 150px;
+        left: 5%;
+        font-size: 3.5rem;
+        opacity: 0.2;
+        transform: rotate(45deg);
+        animation: swing 6s infinite ease-in-out;
+        z-index: 1;
+        filter: drop-shadow(0 0 30px var(--electric-blue));
+        color: var(--electric-blue);
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+      }
+
+      @keyframes swing {
+        0%,
+        100% {
+          transform: translateY(-50%) rotate(-10deg);
+        }
+        50% {
+          transform: translateY(-50%) rotate(10deg);
+        }
+      }
+
+      .glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(
+          circle,
+          rgba(0, 243, 255, 0.15) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 2;
+        filter: blur(50px);
+      }
+
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(
+          180deg,
+          var(--electric-blue),
+          var(--electric-cyan),
+          var(--electric-blue)
+        );
+        box-shadow: 0 0 30px var(--electric-blue);
+        z-index: 999;
+        pointer-events: none;
+        animation: borderPulse 2s infinite ease-in-out;
+      }
+
+      body::before {
+        left: 0;
+      }
+
+      body::after {
+        right: 0;
+      }
+
+      @keyframes borderPulse {
+        0%,
+        100% {
+          opacity: 0.5;
+          box-shadow: 0 0 30px var(--electric-blue);
+        }
+        50% {
+          opacity: 1;
+          box-shadow: 0 0 50px var(--electric-cyan);
+        }
+      }
+
+      @media (max-width: 1200px) {
+        .content-wrapper {
+          width: 60%;
+        }
+      }
+
+      @media (max-width: 992px) {
+        .content-wrapper {
+          width: 70%;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .content-wrapper {
+          width: 85%;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .page-header h1 {
+          font-size: 1.8rem;
+        }
+
+        .radio-group {
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .ship,
+        .anchor {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ocean">
+      <div class="bubbles">
+        <div
+          class="bubble"
+          style="left: 10%; width: 20px; height: 20px; animation-duration: 12s"
+        ></div>
+        <div
+          class="bubble"
+          style="
+            left: 20%;
+            width: 40px;
+            height: 40px;
+            animation-duration: 8s;
+            animation-delay: 2s;
+          "
+        ></div>
+        <div
+          class="bubble"
+          style="
+            left: 35%;
+            width: 25px;
+            height: 25px;
+            animation-duration: 15s;
+            animation-delay: 1s;
+          "
+        ></div>
+        <div
+          class="bubble"
+          style="
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            animation-duration: 10s;
+            animation-delay: 3s;
+          "
+        ></div>
+        <div
+          class="bubble"
+          style="
+            left: 65%;
+            width: 30px;
+            height: 30px;
+            animation-duration: 14s;
+            animation-delay: 0.5s;
+          "
+        ></div>
+        <div
+          class="bubble"
+          style="
+            left: 80%;
+            width: 35px;
+            height: 35px;
+            animation-duration: 9s;
+            animation-delay: 2.5s;
+          "
+        ></div>
+        <div
+          class="bubble"
+          style="
+            left: 95%;
+            width: 45px;
+            height: 45px;
+            animation-duration: 11s;
+            animation-delay: 1.5s;
+          "
+        ></div>
+      </div>
+    </div>
+
+    <nav>
+      <div class="nav-container">
+        <div class="logo">DOCKTEASE</div>
+        <ul class="nav-links">
+          <li><a href="index.html">Accueil</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="ship">⛵</div>
+    <div class="anchor">⚓</div>
+    <div class="glow"></div>
+
+    <main>
+      <div class="content-wrapper">
+        <div class="page-header">
+          <h1>CONTACT</h1>
+          <p>
+            Besoin de nous contacter ? Une question ? Un problème ? Écrivez-nous
+          </p>
+        </div>
+
+        <div id="notification" class="message" style="display: none"></div>
+
+        <div class="contact-form-container">
+          <h2><i class="fas fa-envelope"></i> FORMULAIRE</h2>
+
+          <form id="contactForm">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="nom">Nom</label>
+                <div class="input-container">
+                  <i class="fas fa-user"></i>
+                  <input
+                    type="text"
+                    id="nom"
+                    placeholder="Votre nom"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="prenom">Prénom</label>
+                <div class="input-container">
+                  <i class="fas fa-user"></i>
+                  <input
+                    type="text"
+                    id="prenom"
+                    placeholder="Votre prénom"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="entreprise">Entreprise</label>
+                <div class="input-container">
+                  <i class="fas fa-building"></i>
+                  <input
+                    type="text"
+                    id="entreprise"
+                    placeholder="Nom de votre entreprise"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="telephone">Téléphone</label>
+                <div class="input-container">
+                  <i class="fas fa-phone"></i>
+                  <input
+                    type="tel"
+                    id="telephone"
+                    placeholder="06 12 34 56 78"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="sujet">Sujet</label>
+              <div class="input-container">
+                <i class="fas fa-tag"></i>
+                <input
+                  type="text"
+                  id="sujet"
+                  placeholder="Sujet de votre message"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="message">Message</label>
+              <div class="input-container">
+                <i class="fas fa-comment"></i>
+                <textarea
+                  id="message"
+                  placeholder="Votre message..."
+                  required
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="separator">
+              <div class="separator-line"></div>
+            </div>
+
+            <div class="form-group">
+              <label>Nature de la demande</label>
+              <div class="radio-group">
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="typeRdv"
+                    name="demandeType"
+                    value="rendez-vous"
+                    checked
+                  />
+                  <label for="typeRdv"
+                    ><i class="fas fa-calendar"></i> Rendez-vous</label
+                  >
+                </div>
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="typeProbleme"
+                    name="demandeType"
+                    value="probleme"
+                  />
+                  <label for="typeProbleme"
+                    ><i class="fas fa-exclamation-triangle"></i> Problème</label
+                  >
+                </div>
+                <div class="radio-option">
+                  <input
+                    type="radio"
+                    id="typeInfo"
+                    name="demandeType"
+                    value="information"
+                  />
+                  <label for="typeInfo"
+                    ><i class="fas fa-info-circle"></i> Information</label
+                  >
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+              <i class="fas fa-paper-plane"></i> ENVOYER
+            </button>
+
+            <div class="cooldown-warning">
+              <i class="fas fa-clock"></i> 1 message toutes les 6h
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <div class="modal-overlay" id="successModal">
+      <div class="modal-container">
+        <div class="modal-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h2 class="modal-title">ENVOYÉ !</h2>
+        <div class="modal-message">
+          Votre message a bien été transmis.<br />
+          Nous vous répondrons dans les plus brefs délais.
+        </div>
+        <button class="modal-btn" id="closeModalBtn">
+          <i class="fas fa-check"></i> FERMER
+        </button>
+      </div>
+    </div>
+
+    <div class="wave-container">
+      <div class="wave"></div>
+      <div class="wave"></div>
+    </div>
+
+    <footer>
+      <div class="footer-content">
+        <div class="copyright">© 2026 Docktease. Tous droits réservés.</div>
+      </div>
+    </footer>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCdWfl4z-IDgZUzI7WA0lv7q720g37takQ",
+        authDomain: "docktease-cf5ef.firebaseapp.com",
+        projectId: "docktease-cf5ef",
+        storageBucket: "docktease-cf5ef.firebasestorage.app",
+        messagingSenderId: "451363268650",
+        appId: "1:451363268650:web:792a14ae823c82e78f3b53",
+        measurementId: "G-N8H0Z0D2X1",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      const DISCORD_WEBHOOK_URL =
+        "https://discord.com/api/webhooks/1479216429076316180/2tW0oAV52WwO8IL-V9x9ei9nqP6n4UYUiVKkiAFsYzmN3frc2pjjABd5fl7Vu0a6mDE4";
+      const ROLE_ID = "1302571533041926156";
+      const COOLDOWN_TIME = 6 * 60 * 60 * 1000;
+      const STORAGE_KEY = "docktease_contact_cooldown";
+
+      const contactForm = document.getElementById("contactForm");
+      const submitBtn = document.getElementById("submitBtn");
+      const notification = document.getElementById("notification");
+      const successModal = document.getElementById("successModal");
+      const closeModalBtn = document.getElementById("closeModalBtn");
+
+      function checkCooldown() {
+        const lastSubmit = localStorage.getItem(STORAGE_KEY);
+        if (!lastSubmit) return false;
+        const timePassed = Date.now() - parseInt(lastSubmit);
+        return timePassed < COOLDOWN_TIME;
+      }
+
+      function getRemainingTime() {
+        const lastSubmit = localStorage.getItem(STORAGE_KEY);
+        if (!lastSubmit) return 0;
+        const timePassed = Date.now() - parseInt(lastSubmit);
+        const remaining = COOLDOWN_TIME - timePassed;
+        return remaining > 0 ? remaining : 0;
+      }
+
+      function updateCooldownButton() {
+        const remaining = getRemainingTime();
+
+        if (remaining > 0) {
+          submitBtn.disabled = true;
+          const hours = Math.floor(remaining / (60 * 60 * 1000));
+          const minutes = Math.floor(
+            (remaining % (60 * 60 * 1000)) / (60 * 1000),
+          );
+          submitBtn.innerHTML = `<i class="fas fa-clock"></i> ${hours}h ${minutes}m`;
+
+          setTimeout(updateCooldownButton, 1000);
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> ENVOYER';
+        }
+      }
+
+      function showNotification(message, type) {
+        notification.textContent = message;
+        notification.className = "message " + type;
+        notification.style.display = "block";
+
+        setTimeout(() => {
+          notification.style.display = "none";
+        }, 3000);
+      }
+
+      function showSuccessModal() {
+        successModal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeSuccessModal() {
+        successModal.style.display = "none";
+        document.body.style.overflow = "auto";
+      }
+
+      function formatDiscordEmbed(formData) {
+        const typeLabels = {
+          "rendez-vous": "📅 Rendez-vous",
+          probleme: "⚠️ Problème",
+          information: "ℹ️ Information",
+        };
+
+        return {
+          content: `<@&${ROLE_ID}> 📬 **NOUVEAU CONTACT**`,
+          embeds: [
+            {
+              title: "📨 Message",
+              color: 0x00f3ff,
+              fields: [
+                {
+                  name: "👤 Nom",
+                  value: `${formData.prenom} ${formData.nom}`,
+                  inline: true,
+                },
+                {
+                  name: "🏢 Entreprise",
+                  value: formData.entreprise,
+                  inline: true,
+                },
+                {
+                  name: "📞 Téléphone",
+                  value: formData.telephone,
+                  inline: true,
+                },
+                { name: "🏷️ Sujet", value: formData.sujet, inline: false },
+                {
+                  name: "📋 Type",
+                  value: typeLabels[formData.demandeType],
+                  inline: false,
+                },
+                { name: "💬 Message", value: formData.message, inline: false },
+              ],
+              footer: { text: "Docktease" },
+              timestamp: new Date().toISOString(),
+            },
+          ],
+        };
+      }
+
+      contactForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (checkCooldown()) {
+          showNotification("Attendez 6h entre chaque message", "error");
+          updateCooldownButton();
+          return;
+        }
+
+        const formData = {
+          nom: document.getElementById("nom").value.trim(),
+          prenom: document.getElementById("prenom").value.trim(),
+          entreprise: document.getElementById("entreprise").value.trim(),
+          telephone: document.getElementById("telephone").value.trim(),
+          sujet: document.getElementById("sujet").value.trim(),
+          message: document.getElementById("message").value.trim(),
+          demandeType: document.querySelector(
+            'input[name="demandeType"]:checked',
+          ).value,
+        };
+
+        if (
+          !formData.nom ||
+          !formData.prenom ||
+          !formData.entreprise ||
+          !formData.telephone ||
+          !formData.sujet ||
+          !formData.message
+        ) {
+          showNotification("Tous les champs sont requis", "error");
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ENVOI...';
+
+        try {
+          await db.collection("contacts").add({
+            ...formData,
+            date: firebase.firestore.FieldValue.serverTimestamp(),
+            status: "non lu",
+          });
+
+          const discordPayload = formatDiscordEmbed(formData);
+
+          const response = await fetch(DISCORD_WEBHOOK_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(discordPayload),
+          });
+
+          if (!response.ok) throw new Error("Erreur Discord");
+
+          localStorage.setItem(STORAGE_KEY, Date.now().toString());
+
+          contactForm.reset();
+          showSuccessModal();
+        } catch (error) {
+          console.error("Erreur:", error);
+          showNotification("Erreur d'envoi", "error");
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> ENVOYER';
+        }
+      });
+
+      closeModalBtn.addEventListener("click", closeSuccessModal);
+
+      successModal.addEventListener("click", function (e) {
+        if (e.target === successModal) {
+          closeSuccessModal();
+        }
+      });
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && successModal.style.display === "flex") {
+          closeSuccessModal();
+        }
+      });
+
+      if (checkCooldown()) {
+        updateCooldownButton();
+      }
+    </script>
+  </body>
+</html>
