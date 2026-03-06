@@ -12,6 +12,8 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
       * {
         margin: 0;
@@ -143,6 +145,7 @@
         font-family: "Orbitron", sans-serif;
         background: linear-gradient(135deg, var(--electric-blue) 0%, #fff 100%);
         -webkit-background-clip: text;
+        background-clip: text;
         -webkit-text-fill-color: transparent;
         letter-spacing: 2px;
         position: relative;
@@ -262,6 +265,7 @@
           #fff 100%
         );
         -webkit-background-clip: text;
+        background-clip: text;
         -webkit-text-fill-color: transparent;
         text-shadow:
           0 0 60px var(--electric-blue),
@@ -865,6 +869,8 @@
         }
       }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   </head>
   <body>
     <div class="ocean">
@@ -940,8 +946,8 @@
       <div class="nav-container">
         <div class="logo">DOCKTEASE</div>
         <ul class="nav-links">
-          <li><a href="#">Accueil</a></li>
-          <li><a href="#">Contact</a></li>
+          <li><a href="index.html">Accueil</a></li>
+          <li><a href="contact.html">Contact</a></li>
         </ul>
       </div>
     </nav>
@@ -1031,6 +1037,19 @@
     </footer>
 
     <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCdWfl4z-IDgZUzI7WA0lv7q720g37takQ",
+        authDomain: "docktease-cf5ef.firebaseapp.com",
+        projectId: "docktease-cf5ef",
+        storageBucket: "docktease-cf5ef.firebasestorage.app",
+        messagingSenderId: "451363268650",
+        appId: "1:451363268650:web:792a14ae823c82e78f3b53",
+        measurementId: "G-N8H0Z0D2X1",
+      };
+
+      const app = firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+
       const modalOverlay = document.getElementById("loginModal");
       const openModalBtn = document.getElementById("openLoginModal");
       const closeModalBtn = document.getElementById("closeModal");
@@ -1041,6 +1060,24 @@
       const btnText = document.getElementById("btnText");
       const btnLoading = document.getElementById("btnLoading");
       const messageDiv = document.getElementById("message");
+
+      const ADMIN_EMAIL = "n4yl4@dock.com";
+
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          console.log("Utilisateur connecté:", user.email);
+
+          const userEmail = user.email ? user.email.toLowerCase() : "";
+
+          if (userEmail === ADMIN_EMAIL) {
+            console.log("Admin détecté, redirection vers dashboard.html");
+            window.location.href = "dashboard.html";
+          } else {
+            console.log("Utilisateur standard, redirection vers commande.html");
+            window.location.href = "commande.html";
+          }
+        }
+      });
 
       openModalBtn.addEventListener("click", function () {
         modalOverlay.style.display = "flex";
@@ -1105,21 +1142,60 @@
         showLoading(true);
         showMessage("", "");
 
-        setTimeout(() => {
-          if (email === "demo@docktease.com" && password === "demo123") {
-            showMessage("Connexion réussie ! Redirection...", "success");
+        try {
+          const userCredential = await auth.signInWithEmailAndPassword(
+            email,
+            password,
+          );
+          const user = userCredential.user;
 
-            setTimeout(() => {
-              closeModal();
+          showMessage("Connexion réussie ! Redirection...", "success");
+
+          const userEmail = user.email ? user.email.toLowerCase() : "";
+
+          setTimeout(() => {
+            closeModal();
+            if (userEmail === ADMIN_EMAIL) {
+              console.log("Admin connecté, redirection vers dashboard.html");
               window.location.href = "dashboard.html";
-            }, 1500);
-          } else {
-            showMessage("Email ou mot de passe incorrect", "error");
-            showLoading(false);
-            passwordInput.value = "";
-            passwordInput.focus();
+            } else {
+              console.log(
+                "Utilisateur standard, redirection vers commande.html",
+              );
+              window.location.href = "commande.html";
+            }
+          }, 1500);
+        } catch (error) {
+          console.error("Erreur de connexion:", error);
+
+          let errorMessage = "Email ou mot de passe incorrect";
+
+          switch (error.code) {
+            case "auth/user-not-found":
+              errorMessage = "Aucun compte trouvé avec cet email";
+              break;
+            case "auth/wrong-password":
+              errorMessage = "Mot de passe incorrect";
+              break;
+            case "auth/invalid-email":
+              errorMessage = "Format d'email invalide";
+              break;
+            case "auth/user-disabled":
+              errorMessage = "Ce compte a été désactivé";
+              break;
+            case "auth/too-many-requests":
+              errorMessage = "Trop de tentatives. Réessayez plus tard";
+              break;
+            case "auth/network-request-failed":
+              errorMessage = "Erreur réseau. Vérifiez votre connexion";
+              break;
           }
-        }, 1500);
+
+          showMessage(errorMessage, "error");
+          showLoading(false);
+          passwordInput.value = "";
+          passwordInput.focus();
+        }
       });
 
       document.addEventListener("DOMContentLoaded", function () {
