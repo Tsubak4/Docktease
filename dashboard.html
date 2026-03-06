@@ -1,0 +1,1080 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Docktease - Admin</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --marine-deep: #0a2647;
+        --marine-medium: #144272;
+        --marine-light: #2c74b3;
+        --electric-blue: #00f3ff;
+        --electric-cyan: #00ffff;
+        --white: #ffffff;
+        --glow-intensity: 0.8;
+      }
+
+      body {
+        font-family: "Roboto", sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(
+          145deg,
+          #0a2647 0%,
+          #144272 35%,
+          #2c74b3 70%,
+          #a5d7e8 100%
+        );
+        color: #fff;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      .ocean {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+      }
+
+      .bubbles {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
+
+      .bubble {
+        position: absolute;
+        bottom: -100px;
+        background: rgba(0, 243, 255, 0.2);
+        border-radius: 50%;
+        box-shadow:
+          0 0 20px var(--electric-blue),
+          inset 0 0 10px rgba(255, 255, 255, 0.5);
+        animation: rise 15s infinite ease-in;
+      }
+
+      @keyframes rise {
+        0% {
+          transform: translateY(0) rotate(0deg);
+          opacity: 0.1;
+        }
+        100% {
+          transform: translateY(-1000px) rotate(720deg);
+          opacity: 0.8;
+        }
+      }
+
+      nav {
+        background: rgba(10, 38, 71, 0.3);
+        backdrop-filter: blur(10px);
+        border-bottom: 3px solid var(--electric-blue);
+        box-shadow: 0 5px 25px var(--electric-blue);
+        padding: 1rem 2rem;
+        position: fixed;
+        width: 100%;
+        z-index: 100;
+        animation: headerNeon 2s infinite ease-in-out;
+      }
+
+      @keyframes headerNeon {
+        0%,
+        100% {
+          border-bottom-color: var(--electric-blue);
+          box-shadow: 0 5px 25px var(--electric-blue);
+        }
+        50% {
+          border-bottom-color: var(--electric-cyan);
+          box-shadow: 0 5px 35px var(--electric-cyan);
+        }
+      }
+
+      .nav-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        font-size: 2rem;
+        font-weight: 800;
+        font-family: "Orbitron", sans-serif;
+        background: linear-gradient(135deg, var(--electric-blue) 0%, #fff 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 2px;
+        position: relative;
+        text-shadow: 0 0 30px var(--electric-blue);
+      }
+
+      .logo::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--electric-blue),
+          var(--electric-cyan),
+          transparent
+        );
+        box-shadow: 0 0 20px var(--electric-blue);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+      }
+
+      .nav-links a {
+        color: #fff;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+        position: relative;
+        text-shadow: 0 0 10px var(--electric-blue);
+      }
+
+      .nav-links a::before {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 2px;
+        background: var(--electric-blue);
+        box-shadow: 0 0 20px var(--electric-blue);
+        transition: width 0.3s ease;
+      }
+
+      .nav-links a:hover::before {
+        width: 70%;
+      }
+
+      .nav-links a:hover {
+        text-shadow:
+          0 0 20px var(--electric-blue),
+          0 0 40px var(--electric-blue);
+      }
+
+      .logout-btn {
+        background: rgba(255, 0, 0, 0.1) !important;
+        border: 1px solid #ff4444 !important;
+        box-shadow: 0 0 15px #ff4444 !important;
+        cursor: pointer;
+      }
+
+      .logout-btn:hover {
+        background: rgba(255, 68, 68, 0.2) !important;
+        box-shadow: 0 0 25px #ff4444 !important;
+      }
+
+      main {
+        flex: 1;
+        padding: 6rem 2rem 4rem;
+        position: relative;
+        z-index: 10;
+        max-width: 1400px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .dashboard-header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      .dashboard-header h1 {
+        font-family: "Orbitron", sans-serif;
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(
+          135deg,
+          #fff 0%,
+          var(--electric-blue) 50%,
+          #fff 100%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 30px var(--electric-blue);
+      }
+
+      .dashboard-header p {
+        color: var(--electric-blue);
+        font-size: 1.1rem;
+        text-shadow: 0 0 10px var(--electric-blue);
+      }
+
+      .admin-info {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 1rem;
+        background: rgba(0, 243, 255, 0.1);
+        border: 1px solid var(--electric-blue);
+        border-radius: 10px;
+        box-shadow: 0 0 20px var(--electric-blue);
+        backdrop-filter: blur(5px);
+        font-size: 1.2rem;
+      }
+
+      .add-form-container {
+        background: rgba(10, 38, 71, 0.5);
+        backdrop-filter: blur(10px);
+        border: 2px solid var(--electric-blue);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 0 30px var(--electric-blue);
+      }
+
+      .add-form-container h2 {
+        font-family: "Orbitron", sans-serif;
+        color: var(--electric-blue);
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-size: 1.8rem;
+        text-shadow: 0 0 15px var(--electric-blue);
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group {
+        position: relative;
+      }
+
+      .form-group label {
+        display: block;
+        font-family: "Orbitron", sans-serif;
+        color: var(--electric-blue);
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: 0 0 10px var(--electric-blue);
+      }
+
+      .input-container {
+        position: relative;
+      }
+
+      .input-container i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--electric-blue);
+        font-size: 1.1rem;
+        text-shadow: 0 0 5px var(--electric-blue);
+        z-index: 2;
+      }
+
+      .input-container input {
+        width: 100%;
+        padding: 12px 12px 12px 40px;
+        background: rgba(10, 38, 71, 0.8);
+        border: 2px solid var(--electric-blue);
+        border-radius: 8px;
+        color: #fff;
+        font-size: 0.9rem;
+        font-family: "Roboto", sans-serif;
+        transition: all 0.3s ease;
+        outline: none;
+      }
+
+      .input-container input:focus {
+        border-color: var(--electric-cyan);
+        background: rgba(10, 38, 71, 0.9);
+        box-shadow: 0 0 15px var(--electric-blue);
+      }
+
+      .input-container input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      .btn-add {
+        width: 100%;
+        padding: 14px;
+        background: rgba(0, 243, 255, 0.1);
+        border: 2px solid var(--electric-blue);
+        border-radius: 8px;
+        color: #fff;
+        font-family: "Orbitron", sans-serif;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-shadow: 0 0 10px var(--electric-blue);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 0 20px var(--electric-blue);
+      }
+
+      .btn-add:hover {
+        background: rgba(0, 243, 255, 0.2);
+        box-shadow: 0 0 25px var(--electric-blue);
+        transform: translateY(-2px);
+      }
+
+      .btn-add::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(0, 243, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .btn-add:hover::before {
+        left: 100%;
+      }
+
+      .companies-list-container {
+        background: rgba(10, 38, 71, 0.5);
+        backdrop-filter: blur(10px);
+        border: 2px solid var(--electric-blue);
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 0 30px var(--electric-blue);
+      }
+
+      .companies-list-container h2 {
+        font-family: "Orbitron", sans-serif;
+        color: var(--electric-blue);
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-size: 1.8rem;
+        text-shadow: 0 0 15px var(--electric-blue);
+      }
+
+      .table-responsive {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+
+      th {
+        font-family: "Orbitron", sans-serif;
+        color: var(--electric-blue);
+        text-align: left;
+        padding: 1rem;
+        border-bottom: 2px solid var(--electric-blue);
+        text-shadow: 0 0 10px var(--electric-blue);
+      }
+
+      td {
+        padding: 1rem;
+        border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+        color: #fff;
+      }
+
+      tr:hover {
+        background: rgba(0, 243, 255, 0.1);
+      }
+
+      .btn-delete {
+        background: transparent;
+        border: 2px solid #ff4444;
+        color: #ff4444;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.9rem;
+        text-shadow: 0 0 5px #ff4444;
+        box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+      }
+
+      .btn-delete:hover {
+        background: #ff4444;
+        color: #fff;
+        box-shadow: 0 0 20px #ff4444;
+        transform: translateY(-2px);
+      }
+
+      .message {
+        margin-top: 15px;
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        font-family: "Roboto", sans-serif;
+        font-size: 0.9rem;
+        display: none;
+        border: 2px solid;
+      }
+
+      .message.success {
+        display: block;
+        background: rgba(0, 243, 255, 0.1);
+        border-color: var(--electric-blue);
+        color: #fff;
+        text-shadow: 0 0 5px var(--electric-blue);
+      }
+
+      .message.error {
+        display: block;
+        background: rgba(255, 0, 0, 0.1);
+        border-color: #ff4444;
+        color: #ff9999;
+        text-shadow: 0 0 5px rgba(255, 68, 68, 0.5);
+      }
+
+      .loading-spinner {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border: 3px solid rgba(0, 243, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--electric-blue);
+        animation: spin 1s ease-in-out infinite;
+        margin: 2rem auto;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .wave-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: 5;
+      }
+
+      .wave {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100px;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%2300f3ff" fill-opacity="0.3" d="M0,256L48,234.7C96,213,192,171,288,176C384,181,480,235,576,250.7C672,267,768,245,864,208C960,171,1056,117,1152,112C1248,107,1344,149,1392,170.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"/></svg>');
+        background-size: cover;
+        background-repeat: no-repeat;
+        animation: wave 8s infinite linear;
+        filter: drop-shadow(0 0 20px var(--electric-blue));
+      }
+
+      .wave:nth-child(2) {
+        bottom: 10px;
+        opacity: 0.5;
+        animation: wave 10s infinite linear reverse;
+        filter: drop-shadow(0 0 30px var(--electric-cyan));
+      }
+
+      @keyframes wave {
+        0% {
+          transform: translateX(0) translateZ(0) scaleY(1);
+        }
+        50% {
+          transform: translateX(-25%) translateZ(0) scaleY(0.8);
+        }
+        100% {
+          transform: translateX(-50%) translateZ(0) scaleY(1);
+        }
+      }
+
+      footer {
+        background: rgba(10, 38, 71, 0.8);
+        backdrop-filter: blur(10px);
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        z-index: 20;
+        border-top: 3px solid var(--electric-blue);
+        box-shadow: 0 -5px 25px var(--electric-blue);
+        animation: footerNeon 2s infinite ease-in-out;
+      }
+
+      @keyframes footerNeon {
+        0%,
+        100% {
+          border-top-color: var(--electric-blue);
+          box-shadow: 0 -5px 25px var(--electric-blue);
+        }
+        50% {
+          border-top-color: var(--electric-cyan);
+          box-shadow: 0 -5px 35px var(--electric-cyan);
+        }
+      }
+
+      .footer-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .copyright {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1rem;
+        text-shadow: 0 0 15px var(--electric-blue);
+        letter-spacing: 1px;
+        text-align: center;
+      }
+
+      .ship {
+        position: absolute;
+        bottom: 150px;
+        right: 5%;
+        font-size: 5rem;
+        opacity: 0.2;
+        animation: float 6s infinite ease-in-out;
+        z-index: 1;
+        filter: drop-shadow(0 0 30px var(--electric-blue));
+        color: var(--electric-blue);
+      }
+
+      .anchor {
+        position: absolute;
+        top: 150px;
+        left: 5%;
+        font-size: 4rem;
+        opacity: 0.2;
+        transform: rotate(45deg);
+        animation: swing 6s infinite ease-in-out;
+        z-index: 1;
+        filter: drop-shadow(0 0 30px var(--electric-blue));
+        color: var(--electric-blue);
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+      }
+
+      @keyframes swing {
+        0%,
+        100% {
+          transform: translateY(-50%) rotate(-10deg);
+        }
+        50% {
+          transform: translateY(-50%) rotate(10deg);
+        }
+      }
+
+      .glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(
+          circle,
+          rgba(0, 243, 255, 0.15) 0%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 2;
+        filter: blur(50px);
+      }
+
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(
+          180deg,
+          var(--electric-blue),
+          var(--electric-cyan),
+          var(--electric-blue)
+        );
+        box-shadow: 0 0 30px var(--electric-blue);
+        z-index: 999;
+        pointer-events: none;
+        animation: borderPulse 2s infinite ease-in-out;
+      }
+
+      body::before {
+        left: 0;
+      }
+
+      body::after {
+        right: 0;
+      }
+
+      @keyframes borderPulse {
+        0%,
+        100% {
+          opacity: 0.5;
+          box-shadow: 0 0 30px var(--electric-blue);
+        }
+        50% {
+          opacity: 1;
+          box-shadow: 0 0 50px var(--electric-cyan);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .table-responsive {
+          font-size: 0.9rem;
+        }
+
+        th,
+        td {
+          padding: 0.75rem;
+        }
+
+        .btn-delete {
+          padding: 0.3rem 0.6rem;
+          font-size: 0.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ocean">
+      <div class="bubbles">
+        <div
+          class="bubble"
+          style="left: 10%; width: 20px; height: 20px; animation-duration: 12s"
+        ></div>
+        <div
+          class="bubble"
+          style="
+            left: 20%;
+            width: 40px;
+            height: 40px;
+            animation-duration: 8s;
+            animation-delay: 2s;
+          "
+        ></div>
+        <div
+          class="bubble"
+          style="
+            left: 35%;
+            width: 25px;
+            height: 25px;
+            animation-duration: 15s;
+            animation-delay: 1s;
+          "
+        ></div>
+        <div
+          class="bubble"
+          style="
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            animation-duration: 10s;
+            animation-delay: 3s;
+          "
+        ></div>
+        <div
+          class="bubble"
+          style="
+            left: 65%;
+            width: 30px;
+            height: 30px;
+            animation-duration: 14s;
+            animation-delay: 0.5s;
+          "
+        ></div>
+        <div
+          class="bubble"
+          style="
+            left: 80%;
+            width: 35px;
+            height: 35px;
+            animation-duration: 9s;
+            animation-delay: 2.5s;
+          "
+        ></div>
+        <div
+          class="bubble"
+          style="
+            left: 95%;
+            width: 45px;
+            height: 45px;
+            animation-duration: 11s;
+            animation-delay: 1.5s;
+          "
+        ></div>
+      </div>
+    </div>
+
+    <nav>
+      <div class="nav-container">
+        <div class="logo">DOCKTEASE</div>
+        <ul class="nav-links">
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li>
+            <a href="#" class="logout-btn" id="logoutBtn"
+              ><i class="fas fa-sign-out-alt"></i> Déconnexion</a
+            >
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="ship">⛵</div>
+    <div class="anchor">⚓</div>
+    <div class="glow"></div>
+
+    <main>
+      <div class="dashboard-header">
+        <h1>PANEL ADMINISTRATEUR</h1>
+        <p>Gestion des entreprises partenaires</p>
+      </div>
+
+      <div id="notification" class="message" style="display: none"></div>
+
+      <div class="admin-info" id="adminInfo">
+        <i class="fas fa-user-shield"></i> Vérification des droits
+        administrateur...
+      </div>
+
+      <div class="add-form-container">
+        <h2><i class="fas fa-plus-circle"></i> AJOUTER UNE ENTREPRISE</h2>
+        <form id="addCompanyForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="companyName">Nom de l'entreprise</label>
+              <div class="input-container">
+                <i class="fas fa-building"></i>
+                <input
+                  type="text"
+                  id="companyName"
+                  placeholder="Docktease Maritime"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <div class="input-container">
+                <i class="fas fa-envelope"></i>
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="contact@entreprise.com"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="password">Mot de passe</label>
+              <div class="input-container">
+                <i class="fas fa-lock"></i>
+                <input
+                  type="password"
+                  id="password"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="discordThreadId">ID du fil Discord (Thread ID)</label>
+              <div class="input-container">
+                <i class="fab fa-discord"></i>
+                <input
+                  type="text"
+                  id="discordThreadId"
+                  placeholder="1479216368137273416"
+                  required
+                />
+              </div>
+              <small style="color: var(--electric-blue)"
+                >L'ID du thread dans le forum Discord</small
+              >
+            </div>
+          </div>
+          <button type="submit" class="btn-add" id="addCompanyBtn">
+            <i class="fas fa-save"></i> CRÉER L'ENTREPRISE
+          </button>
+        </form>
+      </div>
+
+      <div class="companies-list-container">
+        <h2><i class="fas fa-list"></i> ENTREPRISES ENREGISTRÉES</h2>
+        <div class="table-responsive">
+          <table id="companiesTable">
+            <thead>
+              <tr>
+                <th>Entreprise</th>
+                <th>Email</th>
+                <th>Thread Discord ID</th>
+                <th>Date de création</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="companiesList">
+              <tr>
+                <td colspan="5" style="text-align: center">
+                  <div class="loading-spinner"></div>
+                  Chargement des entreprises...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <div class="wave-container">
+      <div class="wave"></div>
+      <div class="wave"></div>
+    </div>
+
+    <footer>
+      <div class="footer-content">
+        <div class="copyright">© 2026 Docktease. Tous droits réservés.</div>
+      </div>
+    </footer>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCdWfl4z-IDgZUzI7WA0lv7q720g37takQ",
+        authDomain: "docktease-cf5ef.firebaseapp.com",
+        projectId: "docktease-cf5ef",
+        storageBucket: "docktease-cf5ef.firebasestorage.app",
+        messagingSenderId: "451363268650",
+        appId: "1:451363268650:web:792a14ae823c82e78f3b53",
+        measurementId: "G-N8H0Z0D2X1",
+      };
+
+      const app = firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      const notification = document.getElementById("notification");
+      const adminInfo = document.getElementById("adminInfo");
+      const addCompanyForm = document.getElementById("addCompanyForm");
+      const companiesList = document.getElementById("companiesList");
+      const logoutBtn = document.getElementById("logoutBtn");
+
+      const ADMIN_EMAIL = "n4yl4@dock.com";
+
+      auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+          window.location.href = "index.html";
+          return;
+        }
+
+        const userEmail = user.email ? user.email.toLowerCase().trim() : "";
+
+        if (userEmail === ADMIN_EMAIL) {
+          adminInfo.innerHTML = `<i class="fas fa-check-circle" style="color: #00ff00;"></i> Connecté en tant qu'administrateur: ${user.email}`;
+          await loadCompanies();
+        } else {
+          adminInfo.innerHTML = `<i class="fas fa-exclamation-triangle" style="color: #ff4444;"></i> Accès non autorisé - Redirection...`;
+          setTimeout(() => {
+            window.location.href = "commande.html";
+          }, 2000);
+        }
+      });
+
+      function showNotification(message, type) {
+        notification.textContent = message;
+        notification.className = "message " + type;
+        notification.style.display = "block";
+
+        setTimeout(() => {
+          notification.style.display = "none";
+        }, 3000);
+      }
+
+      async function loadCompanies() {
+        try {
+          const snapshot = await db.collection("entreprises").get();
+
+          if (snapshot.empty) {
+            companiesList.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2rem;">
+                                <i class="fas fa-info-circle" style="color: var(--electric-blue); font-size: 2rem; margin-bottom: 1rem;"></i><br>
+                                Aucune entreprise enregistrée
+                            </td>
+                        </tr>
+                    `;
+            return;
+          }
+
+          let html = "";
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const date = data.createdAt
+              ? new Date(data.createdAt.toDate()).toLocaleDateString("fr-FR")
+              : "N/A";
+
+            html += `
+                        <tr>
+                            <td>${data.companyName || "N/A"}</td>
+                            <td>${data.email || "N/A"}</td>
+                            <td><small style="color: #00f3ff;">${data.discordThreadId || "Non configuré"}</small></td>
+                            <td>${date}</td>
+                            <td>
+                                <button class="btn-delete" onclick="deleteCompany('${doc.id}')">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+          });
+
+          companiesList.innerHTML = html;
+        } catch (error) {
+          console.error("Erreur chargement:", error);
+          showNotification(
+            "Erreur lors du chargement des entreprises",
+            "error",
+          );
+        }
+      }
+
+      addCompanyForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const companyName = document.getElementById("companyName").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const discordThreadId = document
+          .getElementById("discordThreadId")
+          .value.trim();
+
+        if (!companyName || !email || !password || !discordThreadId) {
+          showNotification("Veuillez remplir tous les champs", "error");
+          return;
+        }
+
+        const addBtn = document.getElementById("addCompanyBtn");
+        addBtn.disabled = true;
+        addBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> CRÉATION...';
+
+        try {
+          const userCredential = await auth.createUserWithEmailAndPassword(
+            email,
+            password,
+          );
+          const user = userCredential.user;
+
+          await db.collection("entreprises").doc(user.uid).set({
+            companyName: companyName,
+            email: email,
+            discordThreadId: discordThreadId,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            uid: user.uid,
+          });
+
+          showNotification("Entreprise créée avec succès !", "success");
+          addCompanyForm.reset();
+          loadCompanies();
+        } catch (error) {
+          console.error("Erreur création:", error);
+
+          let errorMessage = "Erreur lors de la création";
+          if (error.code === "auth/email-already-in-use") {
+            errorMessage = "Cet email est déjà utilisé";
+          } else if (error.code === "auth/weak-password") {
+            errorMessage =
+              "Le mot de passe doit contenir au moins 6 caractères";
+          }
+
+          showNotification(errorMessage, "error");
+        } finally {
+          addBtn.disabled = false;
+          addBtn.innerHTML = '<i class="fas fa-save"></i> CRÉER L\'ENTREPRISE';
+        }
+      });
+
+      window.deleteCompany = async (companyId) => {
+        if (!confirm("Êtes-vous sûr de vouloir supprimer cette entreprise ?")) {
+          return;
+        }
+
+        try {
+          await db.collection("entreprises").doc(companyId).delete();
+          showNotification("Entreprise supprimée avec succès", "success");
+          loadCompanies();
+        } catch (error) {
+          console.error("Erreur suppression:", error);
+          showNotification("Erreur lors de la suppression", "error");
+        }
+      };
+
+      async function handleLogout() {
+        try {
+          await auth.signOut();
+          window.location.href = "index.html";
+        } catch (error) {
+          console.error("Erreur déconnexion:", error);
+          showNotification("Erreur lors de la déconnexion", "error");
+        }
+      }
+
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          handleLogout();
+        });
+      }
+    </script>
+  </body>
+</html>
